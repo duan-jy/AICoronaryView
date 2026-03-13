@@ -10,10 +10,9 @@
     "type-check": "vue-tsc --noEmit"
   },
   "dependencies": {
-    "@cornerstonejs/core": "^2.0.0",
-    "@cornerstonejs/dicom-image-loader": "^2.0.0",
-    "@cornerstonejs/tools": "^2.0.0",
-    "@cornerstonejs/streaming-image-volume-loader": "^2.0.0",
+    "@cornerstonejs/core": "^1.90.0",
+    "@cornerstonejs/dicom-image-loader": "^1.90.0",
+    "@cornerstonejs/tools": "^1.90.0",
     "axios": "^1.7.9",
     "dayjs": "^1.11.13",
     "dicom-parser": "^1.8.21",
