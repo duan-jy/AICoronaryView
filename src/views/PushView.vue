@@ -1,21 +1,18 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { useArteryStore } from '@/stores/artery'
 import { useAppStore } from '@/stores/app'
+import SvgIcon from '@/components/common/SvgIcon.vue'
 import PrintHeader from '@/components/print/PrintHeader.vue'
 import ImageSelector from '@/components/print/ImageSelector.vue'
 import PushServiceList from '@/components/push/PushServiceList.vue'
 
 const route = useRoute()
 const router = useRouter()
-const arteryStore = useArteryStore()
 const appStore = useAppStore()
 
-// Selected images
 const selectedImages = ref<string[]>([])
 
-// Push services
 interface PushService {
   id: number
   name: string
@@ -31,153 +28,83 @@ const pushServices = ref<PushService[]>([
   { id: 5, name: 'TEST', aet: '000002', selected: false }
 ])
 
-// Preview images
 const previewImages = computed(() => {
   return selectedImages.value.slice(0, 2).map((id, index) => ({
     id,
-    label: `LAD ${index === 0 ? '9°' : '18°'}`,
-    info: {
-      studyId: arteryStore.studyInfo.studyId,
-      patientName: arteryStore.studyInfo.patientName,
-      hospital: 'Ganzhou People\'s Hospital',
-      ww: 800,
-      wc: 300
-    }
+    label: `LAD ${index === 0 ? '9' : '18'}`,
+    ww: 800,
+    wc: 300
   }))
 })
 
-// Methods
-const handleImageSelect = (images: string[]) => {
-  selectedImages.value = images
-}
-
+const handleImageSelect = (images: string[]) => { selectedImages.value = images }
 const handleImageToggle = (imageId: string) => {
-  const index = selectedImages.value.indexOf(imageId)
-  if (index === -1) {
-    selectedImages.value.push(imageId)
-  } else {
-    selectedImages.value.splice(index, 1)
-  }
+  const i = selectedImages.value.indexOf(imageId)
+  if (i === -1) selectedImages.value.push(imageId)
+  else selectedImages.value.splice(i, 1)
 }
-
 const handleServiceToggle = (serviceId: number) => {
-  const service = pushServices.value.find(s => s.id === serviceId)
-  if (service) {
-    service.selected = !service.selected
-  }
+  const s = pushServices.value.find(s => s.id === serviceId)
+  if (s) s.selected = !s.selected
 }
 
 const handlePush = async () => {
-  const selectedServices = pushServices.value.filter(s => s.selected)
-  if (selectedServices.length === 0) {
-    alert('请选择推送服务')
-    return
-  }
-
-  appStore.setLoading(true)
+  const selected = pushServices.value.filter(s => s.selected)
+  if (!selected.length) return
+  appStore.setLoading(true, '正在推送...')
   try {
-    // Push logic
-    console.log('Pushing to services:', selectedServices)
-    console.log('Images:', selectedImages.value)
-    
-    // Simulate push
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    
-    alert('推送成功')
-  } catch (error) {
-    console.error('Push failed:', error)
-    alert('推送失败')
+    await new Promise(r => setTimeout(r, 1000))
   } finally {
     appStore.setLoading(false)
   }
 }
 
-const handleClose = () => {
-  router.back()
-}
+const handleClose = () => { router.back() }
 
-// Initialize from route params
 onMounted(() => {
   const images = route.query.images as string
-  if (images) {
-    selectedImages.value = images.split(',')
-  }
+  if (images) selectedImages.value = images.split(',')
 })
 </script>
 
 <template>
   <div class="push-view">
-    <!-- Header -->
-    <PrintHeader
-      :study-id="arteryStore.studyInfo.studyId"
-      @close="handleClose"
-    />
-
-    <!-- Main Content -->
+    <PrintHeader @close="handleClose" />
     <div class="push-content">
       <!-- Left: Preview -->
       <div class="push-preview">
         <div class="preview-grid">
-          <div
-            v-for="(image, index) in previewImages"
-            :key="image.id"
-            class="preview-item"
-          >
+          <div v-for="image in previewImages" :key="image.id" class="preview-item">
             <div class="preview-image">
-              <!-- Image placeholder -->
               <div class="image-placeholder" />
-              
-              <!-- Overlay info -->
               <div class="image-overlay">
                 <div class="info-top-left">
-                  <div>{{ image.info.studyId }}</div>
-                  <div>{{ image.info.patientName }}</div>
-                  <div>{{ image.info.hospital }}</div>
-                </div>
-                <div class="info-top-right">
-                  <div>LinCoilan CT</div>
-                  <div>{{ image.info.studyId }}</div>
-                  <div>{{ image.info.hospital }}</div>
+                  <div>CT20220707228</div>
+                  <div>60020000</div>
+                  <div>Ganzhou People's Hospital</div>
                 </div>
                 <div class="info-label">{{ image.label }}</div>
-                <div class="info-bottom">
-                  <span>ww:{{ image.info.ww }} wc:{{ image.info.wc }}</span>
-                </div>
+                <div class="info-bottom">ww:{{ image.ww }} wc:{{ image.wc }}</div>
               </div>
             </div>
-            
-            <!-- Toolbar -->
             <div class="preview-toolbar">
-              <button class="tool-btn">
-                <i class="iconfont icon-delete" />
+              <button class="toolbar-btn" title="删除">
+                <SvgIcon name="close" :size="14" />
               </button>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Right: Selection Panel -->
-      <div class="push-sidebar">
-        <!-- Image Selector -->
-        <ImageSelector
-          :selected-images="selectedImages"
-          @select="handleImageSelect"
-          @toggle="handleImageToggle"
-        />
-
-        <!-- Push Service List -->
-        <PushServiceList
-          :services="pushServices"
-          @toggle="handleServiceToggle"
-        />
-
-        <!-- Action Buttons -->
+      <!-- Right -->
+      <div class="push-sidebar pretty-bar">
+        <ImageSelector :selected-images="selectedImages" @select="handleImageSelect" @toggle="handleImageToggle" />
+        <PushServiceList :services="pushServices" @toggle="handleServiceToggle" />
         <div class="push-actions">
-          <button class="btn btn-secondary" @click="handleClose">
-            关闭
-          </button>
-          <button class="btn btn-primary" @click="handlePush">
-            推送
+          <button class="btn btn-secondary" @click="handleClose">关闭</button>
+          <button class="btn btn-accent" @click="handlePush">
+            <SvgIcon name="send" :size="14" />
+            推 送
           </button>
         </div>
       </div>
@@ -203,8 +130,6 @@ onMounted(() => {
 
 .push-preview {
   flex: 1;
-  display: flex;
-  flex-direction: column;
   padding: 20px;
   background: var(--bg-secondary);
 }
@@ -232,7 +157,7 @@ onMounted(() => {
 .image-placeholder {
   width: 100%;
   height: 100%;
-  background: linear-gradient(135deg, #1a1a1a 0%, #0d0d0d 100%);
+  background: linear-gradient(135deg, #121a28 0%, #080e18 100%);
 }
 
 .image-overlay {
@@ -248,15 +173,7 @@ onMounted(() => {
   position: absolute;
   top: 12px;
   left: 12px;
-  line-height: 1.4;
-}
-
-.info-top-right {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  text-align: right;
-  line-height: 1.4;
+  line-height: 1.5;
 }
 
 .info-label {
@@ -277,39 +194,34 @@ onMounted(() => {
 .preview-toolbar {
   display: flex;
   justify-content: flex-end;
-  padding: 8px;
+  padding: 6px 8px;
   background: var(--bg-tertiary);
   border: 1px solid var(--border-color);
   border-top: none;
+}
+
+.toolbar-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: color 0.2s;
   
-  .tool-btn {
-    width: 28px;
-    height: 28px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: transparent;
-    border: none;
-    color: var(--text-secondary);
-    cursor: pointer;
-    transition: color 0.2s;
-    
-    &:hover {
-      color: var(--danger-color);
-    }
-    
-    .iconfont {
-      font-size: 16px;
-    }
-  }
+  &:hover { color: var(--danger-color); }
 }
 
 .push-sidebar {
   width: 360px;
   display: flex;
   flex-direction: column;
-  background: var(--bg-tertiary);
+  background: var(--bg-secondary);
   border-left: 1px solid var(--border-color);
+  overflow-y: auto;
 }
 
 .push-actions {
@@ -325,26 +237,6 @@ onMounted(() => {
     font-size: 14px;
     cursor: pointer;
     transition: all 0.2s;
-    
-    &-secondary {
-      background: var(--bg-secondary);
-      border: 1px solid var(--border-color);
-      color: var(--text-primary);
-      
-      &:hover {
-        border-color: var(--primary-color);
-      }
-    }
-    
-    &-primary {
-      background: var(--primary-color);
-      border: none;
-      color: white;
-      
-      &:hover {
-        background: var(--primary-hover);
-      }
-    }
   }
 }
 </style>

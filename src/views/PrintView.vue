@@ -1,15 +1,15 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { ref, computed } from 'vue'
+import { useRouter } from 'vue-router'
 import { useArteryStore } from '@/stores/artery'
 import { useAppStore } from '@/stores/app'
+import SvgIcon from '@/components/common/SvgIcon.vue'
 import PrintHeader from '@/components/print/PrintHeader.vue'
 import PrintGrid from '@/components/print/PrintGrid.vue'
 import ImageSelector from '@/components/print/ImageSelector.vue'
 import LayoutSelector from '@/components/print/LayoutSelector.vue'
 import PrintSettings from '@/components/print/PrintSettings.vue'
 
-const route = useRoute()
 const router = useRouter()
 const arteryStore = useArteryStore()
 const appStore = useAppStore()
@@ -24,6 +24,7 @@ const layoutConfig = ref({
 // Selected images for print
 const selectedImages = ref<string[]>([])
 const currentPage = ref(1)
+const autoFill = ref(true)
 
 // Print settings
 const printSettings = ref({
@@ -35,7 +36,7 @@ const printSettings = ref({
 
 // Computed
 const totalSlots = computed(() => layoutConfig.value.rows * layoutConfig.value.cols)
-const totalPages = computed(() => Math.ceil(selectedImages.value.length / totalSlots.value))
+const totalPages = computed(() => Math.max(1, Math.ceil(selectedImages.value.length / totalSlots.value)))
 
 const currentPageImages = computed(() => {
   const start = (currentPage.value - 1) * totalSlots.value
@@ -70,57 +71,29 @@ const handlePageChange = (page: number) => {
 }
 
 const handlePrint = async () => {
-  appStore.setLoading(true)
+  appStore.setLoading(true, '正在打印...')
   try {
-    // Print logic will be implemented
-    console.log('Printing with settings:', printSettings.value)
-    console.log('Selected images:', selectedImages.value)
-  } catch (error) {
-    console.error('Print failed:', error)
+    console.log('Printing:', printSettings.value, selectedImages.value)
   } finally {
     appStore.setLoading(false)
   }
 }
 
-const handlePush = async () => {
-  router.push({
-    name: 'push',
-    query: { images: selectedImages.value.join(',') }
-  })
+const handlePush = () => {
+  router.push({ name: 'push', query: { images: selectedImages.value.join(',') } })
 }
 
 const handleClose = () => {
   router.back()
 }
-
-// Initialize
-onMounted(() => {
-  // Load available images from artery store
-  const allImages: string[] = []
-  arteryStore.arteryList.forEach(artery => {
-    artery.children?.forEach(segment => {
-      if (segment.images) {
-        segment.images.forEach(img => {
-          allImages.push(img.id)
-        })
-      }
-    })
-  })
-  selectedImages.value = allImages.slice(0, 16) // Default select first 16
-})
 </script>
 
 <template>
   <div class="print-view">
-    <!-- Header -->
-    <PrintHeader
-      :study-id="arteryStore.studyInfo.studyId"
-      @close="handleClose"
-    />
+    <PrintHeader @close="handleClose" />
 
-    <!-- Main Content -->
     <div class="print-content">
-      <!-- Left: Print Grid Preview -->
+      <!-- Left: Grid Preview -->
       <div class="print-preview">
         <PrintGrid
           :images="currentPageImages"
@@ -129,70 +102,56 @@ onMounted(() => {
           :layout-type="layoutConfig.type"
         />
 
-        <!-- Pagination -->
-        <div class="print-pagination">
-          <button 
-            class="page-btn"
-            :disabled="currentPage <= 1"
-            @click="handlePageChange(currentPage - 1)"
-          >
-            <i class="iconfont icon-left" />
-          </button>
-          
-          <div class="page-numbers">
+        <!-- Bottom Bar -->
+        <div class="print-bottom-bar">
+          <label class="auto-fill-toggle">
+            <span>自动向前填充</span>
+            <input v-model="autoFill" type="checkbox" />
+          </label>
+
+          <!-- Pagination -->
+          <div class="print-pagination">
+            <button class="page-btn" :disabled="currentPage <= 1" @click="handlePageChange(currentPage - 1)">
+              <SvgIcon name="chevron-left" :size="14" />
+            </button>
             <button
               v-for="page in totalPages"
               :key="page"
               class="page-num"
               :class="{ active: page === currentPage }"
               @click="handlePageChange(page)"
-            >
-              {{ page }}
+            >{{ page }}</button>
+            <button class="page-btn" :disabled="currentPage >= totalPages" @click="handlePageChange(currentPage + 1)">
+              <SvgIcon name="chevron-right" :size="14" />
             </button>
           </div>
-          
-          <button 
-            class="page-btn"
-            :disabled="currentPage >= totalPages"
-            @click="handlePageChange(currentPage + 1)"
-          >
-            <i class="iconfont icon-right" />
-          </button>
+
+          <div class="print-bottom-actions">
+            <button class="btn btn-secondary btn-sm" @click="handleClose">关 闭</button>
+            <button class="btn btn-accent btn-sm" @click="handlePrint">
+              <SvgIcon name="print" :size="14" />
+              打印
+            </button>
+            <button class="btn btn-accent btn-sm" @click="handlePush">
+              <SvgIcon name="push" :size="14" />
+              推送
+            </button>
+          </div>
         </div>
       </div>
 
       <!-- Right: Selection Panel -->
-      <div class="print-sidebar">
-        <!-- Image Selector -->
+      <div class="print-sidebar pretty-bar">
         <ImageSelector
           :selected-images="selectedImages"
           @select="handleImageSelect"
           @toggle="handleImageToggle"
         />
-
-        <!-- Layout Selector -->
         <LayoutSelector
           :current-layout="layoutConfig"
           @change="handleLayoutChange"
         />
-
-        <!-- Print Settings -->
-        <PrintSettings
-          v-model="printSettings"
-        />
-
-        <!-- Action Buttons -->
-        <div class="print-actions">
-          <button class="btn btn-secondary" @click="handleClose">
-            关闭
-          </button>
-          <button class="btn btn-primary" @click="handlePrint">
-            打印
-          </button>
-          <button class="btn btn-primary" @click="handlePush">
-            推送
-          </button>
-        </div>
+        <PrintSettings v-model="printSettings" />
       </div>
     </div>
   </div>
@@ -218,112 +177,100 @@ onMounted(() => {
   flex: 1;
   display: flex;
   flex-direction: column;
-  padding: 20px;
   background: var(--bg-secondary);
+}
+
+.print-bottom-bar {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 20px;
+  border-top: 1px solid var(--border-color);
+  background: var(--bg-primary);
+}
+
+.auto-fill-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  
+  input {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--accent-color);
+  }
 }
 
 .print-pagination {
   display: flex;
   align-items: center;
+  gap: 4px;
+}
+
+.page-btn {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
   justify-content: center;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all 0.2s;
+  
+  &:hover:not(:disabled) {
+    background: var(--accent-color);
+    border-color: var(--accent-color);
+  }
+  
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+}
+
+.page-num {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  color: var(--text-primary);
+  cursor: pointer;
+  font-size: 12px;
+  transition: all 0.2s;
+  
+  &:hover {
+    border-color: var(--accent-color);
+  }
+  
+  &.active {
+    background: var(--accent-color);
+    border-color: var(--accent-color);
+    color: white;
+  }
+}
+
+.print-bottom-actions {
+  display: flex;
   gap: 8px;
-  padding: 16px;
-  
-  .page-btn {
-    width: 32px;
-    height: 32px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: var(--bg-tertiary);
-    border: 1px solid var(--border-color);
-    border-radius: 4px;
-    color: var(--text-primary);
-    cursor: pointer;
-    transition: all 0.2s;
-    
-    &:hover:not(:disabled) {
-      background: var(--primary-color);
-      border-color: var(--primary-color);
-    }
-    
-    &:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-  }
-  
-  .page-numbers {
-    display: flex;
-    gap: 4px;
-  }
-  
-  .page-num {
-    width: 32px;
-    height: 32px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: transparent;
-    border: 1px solid var(--border-color);
-    border-radius: 4px;
-    color: var(--text-primary);
-    cursor: pointer;
-    transition: all 0.2s;
-    
-    &:hover {
-      border-color: var(--primary-color);
-    }
-    
-    &.active {
-      background: var(--primary-color);
-      border-color: var(--primary-color);
-      color: white;
-    }
-  }
 }
 
 .print-sidebar {
   width: 360px;
   display: flex;
   flex-direction: column;
-  background: var(--bg-tertiary);
+  background: var(--bg-secondary);
   border-left: 1px solid var(--border-color);
-}
-
-.print-actions {
-  display: flex;
-  gap: 12px;
-  padding: 16px;
-  border-top: 1px solid var(--border-color);
-  
-  .btn {
-    flex: 1;
-    height: 36px;
-    border-radius: 4px;
-    font-size: 14px;
-    cursor: pointer;
-    transition: all 0.2s;
-    
-    &-secondary {
-      background: var(--bg-secondary);
-      border: 1px solid var(--border-color);
-      color: var(--text-primary);
-      
-      &:hover {
-        border-color: var(--primary-color);
-      }
-    }
-    
-    &-primary {
-      background: var(--primary-color);
-      border: none;
-      color: white;
-      
-      &:hover {
-        background: var(--primary-hover);
-      }
-    }
-  }
+  overflow-y: auto;
 }
 </style>

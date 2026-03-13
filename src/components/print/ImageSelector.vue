@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { useArteryStore } from '@/stores/artery'
+import SvgIcon from '@/components/common/SvgIcon.vue'
 import type { ImageType } from '@/types'
 
 interface Props {
@@ -12,8 +12,6 @@ const emit = defineEmits<{
   select: [images: string[]]
   toggle: [imageId: string]
 }>()
-
-const arteryStore = useArteryStore()
 
 // Filter tabs
 const imageTypes: { key: ImageType | 'all' | 'combined'; label: string }[] = [
@@ -128,7 +126,7 @@ const clearAll = () => {
           <div class="thumbnail-placeholder" />
           <div class="image-label">{{ image.vessel }} {{ image.angle }}</div>
           <div v-if="isSelected(image.id)" class="check-mark">
-            <i class="iconfont icon-check" />
+            <SvgIcon name="check" :size="12" color="#fff" />
           </div>
         </div>
       </div>
@@ -299,9 +297,8 @@ const clearAll = () => {
   background: var(--success-color);
   border-radius: 2px;
   
-  .iconfont {
-    font-size: 12px;
-    color: white;
+  .svg-icon {
+    display: block;
   }
 }
 

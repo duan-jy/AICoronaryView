@@ -1,90 +1,103 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import SvgIcon from '@/components/common/SvgIcon.vue'
 
-interface Props {
-  studyId: string
-}
-
-const props = defineProps<Props>()
 const emit = defineEmits<{
   close: []
 }>()
-
-const progress = computed(() => 75) // Placeholder
 </script>
 
 <template>
   <header class="print-header">
     <div class="header-left">
-      <div class="logo">
-        <img src="@/assets/logo.png" alt="Logo" />
-      </div>
+      <img src="@/assets/logo.png" alt="Logo" class="logo-img" />
     </div>
 
     <div class="header-center">
-      <span class="study-id">{{ studyId }}</span>
-      <div class="progress-indicator">
-        <i class="iconfont icon-folder" />
-        <span>{{ progress }}%</span>
+      <div class="header-tools">
+        <button class="tool-btn" title="窗宽窗位">
+          <SvgIcon name="contrast" :size="16" />
+        </button>
+        <button class="tool-btn" title="布局">
+          <SvgIcon name="layout" :size="16" />
+        </button>
+        <button class="tool-btn" title="缩放">
+          <SvgIcon name="zoom" :size="16" />
+        </button>
+        <button class="tool-btn" title="旋转">
+          <SvgIcon name="refresh" :size="16" />
+        </button>
+        <button class="tool-btn" title="链接">
+          <SvgIcon name="link" :size="16" />
+        </button>
       </div>
     </div>
 
     <div class="header-right">
-      <span class="title">选择图像</span>
+      <span class="study-id">CT20220707228</span>
+      <SvgIcon name="heart" :size="14" color="var(--primary-color)" />
+      <span class="progress">75%</span>
     </div>
   </header>
 </template>
 
 <style lang="less" scoped>
 .print-header {
-  height: 50px;
+  height: 48px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 20px;
-  background: var(--bg-tertiary);
+  padding: 0 16px;
+  background: var(--header-bg);
   border-bottom: 1px solid var(--border-color);
+  flex-shrink: 0;
 }
 
 .header-left {
-  .logo {
-    height: 32px;
-    
-    img {
-      height: 100%;
-      width: auto;
-    }
+  .logo-img {
+    height: 28px;
+    width: auto;
   }
 }
 
 .header-center {
+  .header-tools {
+    display: flex;
+    gap: 4px;
+  }
+}
+
+.tool-btn {
   display: flex;
   align-items: center;
-  gap: 16px;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: var(--bg-tertiary);
+  border: none;
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
   
-  .study-id {
-    color: var(--primary-color);
-    font-size: 14px;
-  }
-  
-  .progress-indicator {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    color: var(--text-secondary);
-    font-size: 13px;
-    
-    .iconfont {
-      font-size: 16px;
-    }
+  &:hover {
+    color: var(--text-primary);
+    background: var(--bg-elevated);
   }
 }
 
 .header-right {
-  .title {
-    color: var(--text-primary);
-    font-size: 14px;
-    font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  
+  .study-id {
+    color: var(--primary-color);
+    font-size: 13px;
+  }
+  
+  .progress {
+    color: var(--text-secondary);
+    font-size: 12px;
   }
 }
 </style>

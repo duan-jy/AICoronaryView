@@ -1,6 +1,6 @@
 /**
  * AI Coronary Vue3 - Main Stylesheet
- * Dark medical imaging theme
+ * Dark blue medical imaging theme (matching original medical-viewer)
  */
 
 // ============================================
@@ -8,10 +8,16 @@
 // ============================================
 
 :root {
-  // Primary colors
-  --primary-color: #409eff;
-  --primary-light: #66b1ff;
-  --primary-dark: #3a8ee6;
+  // Primary colors - orange/gold accent like original
+  --primary-color: #e6a23c;
+  --primary-light: #f0c060;
+  --primary-dark: #c88520;
+  --primary-hover: #f0c060;
+  
+  // Blue accent
+  --accent-color: #409eff;
+  --accent-light: #66b1ff;
+  --accent-dark: #3a8ee6;
   
   // Status colors
   --success-color: #67c23a;
@@ -19,48 +25,49 @@
   --danger-color: #f56c6c;
   --info-color: #909399;
   
-  // Background colors (dark theme)
-  --bg-primary: #0a0e14;
-  --bg-secondary: #0d1117;
-  --bg-tertiary: #161b22;
-  --bg-elevated: #1c2128;
-  --bg-overlay: rgba(0, 0, 0, 0.75);
+  // Background colors - deep navy blue (matching original)
+  --bg-primary: #0b1624;
+  --bg-secondary: #0f1d30;
+  --bg-tertiary: #132a45;
+  --bg-elevated: #1a3557;
+  --bg-overlay: rgba(8, 18, 32, 0.85);
+  --bg-input: #0e1e35;
   
   // Text colors
-  --text-primary: #e6edf3;
-  --text-secondary: #8b949e;
-  --text-muted: #6e7681;
-  --text-disabled: #484f58;
+  --text-primary: #d4dce8;
+  --text-secondary: #7e94b0;
+  --text-muted: #4a6280;
+  --text-disabled: #3a5070;
   
   // Border colors
-  --border-color: #30363d;
-  --border-light: #21262d;
-  --border-active: #409eff;
+  --border-color: #1e3a5f;
+  --border-light: #162d4a;
+  --border-active: #e6a23c;
   
   // Viewport colors
   --viewport-bg: #000000;
-  --viewport-border: #30363d;
+  --viewport-border: #1e3a5f;
   --viewport-active: #409eff;
   
   // Sidebar
   --sidebar-width: 160px;
-  --sidebar-bg: #0d1117;
+  --sidebar-bg: #0c1828;
   
   // Header
   --header-height: 48px;
-  --header-bg: #161b22;
+  --header-bg: #0e1e33;
   
   // Panel
   --panel-width: 320px;
-  --panel-bg: #0d1117;
+  --panel-bg: #0c1828;
   
   // Misc
   --radius-sm: 4px;
   --radius-md: 6px;
   --radius-lg: 8px;
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
-  --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.4);
-  --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.5);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.6);
   
   // Transitions
   --transition-fast: 0.15s ease;
@@ -105,11 +112,11 @@ ul, li, ol {
 }
 
 a {
-  color: var(--primary-color);
+  color: var(--accent-color);
   text-decoration: none;
   
   &:hover {
-    color: var(--primary-light);
+    color: var(--accent-light);
   }
 }
 
@@ -128,15 +135,15 @@ button {
 input, select, textarea {
   font-family: inherit;
   font-size: inherit;
-  color: inherit;
-  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  background: var(--bg-input);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-sm);
   padding: 6px 12px;
   outline: none;
   
   &:focus {
-    border-color: var(--primary-color);
+    border-color: var(--accent-color);
   }
 }
 
@@ -182,11 +189,11 @@ input[type="number"] {
   &::-webkit-scrollbar {
     width: 10px;
     height: 3px;
-    background: #1c2541;
+    background: #0f1d30;
   }
   
   &::-webkit-scrollbar-track {
-    background-color: #1c2541;
+    background-color: #0f1d30;
   }
   
   &::-webkit-scrollbar-thumb {
@@ -278,14 +285,23 @@ input[type="number"] {
     }
   }
   
+  &-accent {
+    background: var(--accent-color);
+    color: #fff;
+    
+    &:hover:not(:disabled) {
+      background: var(--accent-light);
+    }
+  }
+  
   &-secondary {
     background: var(--bg-tertiary);
     color: var(--text-primary);
     border: 1px solid var(--border-color);
     
     &:hover:not(:disabled) {
-      border-color: var(--primary-color);
-      color: var(--primary-color);
+      border-color: var(--accent-color);
+      color: var(--accent-color);
     }
   }
   
@@ -303,7 +319,7 @@ input[type="number"] {
     color: var(--text-secondary);
     
     &:hover:not(:disabled) {
-      color: var(--primary-color);
+      color: var(--accent-color);
     }
   }
   
@@ -494,7 +510,7 @@ input[type="number"] {
     }
     
     &.active {
-      background: var(--primary-color);
+      background: var(--accent-color);
       color: #fff;
     }
   }
@@ -529,8 +545,8 @@ input[type="number"] {
   }
   
   &.selected {
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 2px var(--primary-color);
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 2px var(--accent-color);
   }
   
   img {
@@ -598,7 +614,7 @@ input[type="number"] {
   width: 100%;
   padding: 6px 28px 6px 12px;
   appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%238b949e' d='M3 4.5L6 7.5L9 4.5'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%237e94b0' d='M3 4.5L6 7.5L9 4.5'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 8px center;
   cursor: pointer;
@@ -704,10 +720,6 @@ input[type="number"] {
       filter: brightness(1.2);
     }
 
-    &.scale-icon {
-      font-size: 20px;
-    }
-
     img {
       width: 16px;
       height: 16px;
@@ -733,7 +745,7 @@ input[type="number"] {
   width: 24px;
   height: 24px;
   border: 2px solid var(--border-color);
-  border-top-color: var(--primary-color);
+  border-top-color: var(--accent-color);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 }

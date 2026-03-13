@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import { useArteryStore } from '@/stores/artery'
 import { useViewerStore } from '@/stores/viewer'
+import SvgIcon from '@/components/common/SvgIcon.vue'
 
 const arteryStore = useArteryStore()
 const viewerStore = useViewerStore()
@@ -63,9 +64,11 @@ function isBranchExpanded(branchId: string): boolean {
           @click="toggleBranch(branch.id)"
         >
           <span 
-            class="icon icon-chevron"
+            class="chevron-icon"
             :class="{ expanded: isBranchExpanded(branch.id) }"
-          >&#9654;</span>
+          >
+            <SvgIcon name="chevron-right" :size="12" />
+          </span>
           <span class="branch-name">{{ branch.name }}</span>
         </div>
         
@@ -178,9 +181,9 @@ function isBranchExpanded(branchId: string): boolean {
     background: var(--bg-tertiary);
   }
   
-  .icon {
-    font-size: 8px;
-    margin-right: 8px;
+  .chevron-icon {
+    display: flex;
+    margin-right: 6px;
     transition: transform var(--transition-fast);
     
     &.expanded {

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { useArteryStore } from '@/stores/artery'
+import SvgIcon from '@/components/common/SvgIcon.vue'
 
 interface Props {
   images: string[]
@@ -10,7 +10,6 @@ interface Props {
 }
 
 const props = defineProps<Props>()
-const arteryStore = useArteryStore()
 
 const gridStyle = computed(() => ({
   gridTemplateColumns: `repeat(${props.cols}, 1fr)`,
@@ -75,7 +74,7 @@ const getImageInfo = (imageId: string | null) => {
         </template>
         <template v-else>
           <div class="empty-cell">
-            <i class="iconfont icon-image" />
+            <SvgIcon name="image" :size="32" color="var(--text-muted)" />
           </div>
         </template>
       </div>
@@ -165,9 +164,7 @@ const getImageInfo = (imageId: string | null) => {
   align-items: center;
   justify-content: center;
   
-  .iconfont {
-    font-size: 32px;
-    color: var(--text-muted);
+  .svg-icon {
     opacity: 0.3;
   }
 }

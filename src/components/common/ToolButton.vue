@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import SvgIcon from './SvgIcon.vue'
+
 interface Props {
   icon: string
   label: string
@@ -16,7 +18,7 @@ defineProps<Props>()
     :disabled="disabled"
     :title="label"
   >
-    <span class="icon" :class="icon"></span>
+    <SvgIcon :name="icon" :size="18" />
   </button>
 </template>
 
@@ -40,7 +42,7 @@ defineProps<Props>()
   }
   
   &.active {
-    background: var(--primary-color);
+    background: var(--accent-color);
     color: #fff;
   }
   
@@ -48,10 +50,6 @@ defineProps<Props>()
   &:disabled {
     opacity: 0.5;
     cursor: not-allowed;
-  }
-  
-  .icon {
-    font-size: 16px;
   }
 }
 </style>
