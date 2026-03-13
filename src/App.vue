@@ -1,39 +1,90 @@
-<template>
-  <router-view v-if="isRouterActive"></router-view>
-</template>
-
-<script setup>
+<script setup lang="ts">
 import { ref, nextTick, provide } from 'vue'
-import { useStore } from 'vuex'
-import storage from './utils/storage'
-import { PROJECT_KEY } from './utils/source'
+import { RouterView } from 'vue-router'
+import { useAppStore } from './stores/app'
 
-const vertical = storage.get(`${PROJECT_KEY}_VERTICAL`, '0')
-
-const isVertical = Number(vertical) === 1
-
-const store = useStore()
-
-store.dispatch('dcm/setVertical', isVertical)
-
-store.dispatch('app/getAppConfig')
-
+const appStore = useAppStore()
 const isRouterActive = ref(true)
+
+// Initialize app config
+appStore.getAppConfig()
 
 const reload = () => {
   isRouterActive.value = false
-  store.dispatch('dcm/setScaleView', '')
-  store.dispatch('dcm/setActiveTools', '')
-  store.dispatch('app/getAppConfig')
   nextTick(() => {
     isRouterActive.value = true
+    appStore.getAppConfig()
   })
 }
 
 provide('reload', reload)
-
-cornerstoneTools.init({
-  globalToolSyncEnabled: true
-})
 </script>
 
+<template>
+  <div class="app-container" :class="{ 'is-loading': appStore.loading }">
+    <RouterView v-if="isRouterActive" />
+    
+    <!-- Global Loading Overlay -->
+    <Transition name="fade">
+      <div v-if="appStore.loading" class="loading-overlay">
+        <div class="loading-spinner"></div>
+        <span class="loading-text">{{ appStore.loadingText || '加载中...' }}</span>
+      </div>
+    </Transition>
+  </div>
+</template>
+
+<style lang="less">
+.app-container {
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  gap: 16px;
+}
+
+.loading-spinner {
+  width: 48px;
+  height: 48px;
+  border: 3px solid var(--border-color);
+  border-top-color: var(--primary-color);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.loading-text {
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+</style>
