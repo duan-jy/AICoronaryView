@@ -1,8 +1,10 @@
 // ============================================
 // Cornerstone3D Type Extensions
+// Pure TypeScript types - no runtime imports
 // ============================================
 
-import type { Types } from '@cornerstonejs/core'
+export type RGB = [number, number, number]
+export type Point3 = [number, number, number]
 
 export interface CS3DViewport {
   id: string
@@ -12,8 +14,8 @@ export interface CS3DViewport {
 }
 
 export interface CS3DViewportOptions {
-  background?: Types.RGB
-  orientation?: Types.OrientationAxis
+  background?: RGB
+  orientation?: string
   displayArea?: {
     storeAsInitialCamera?: boolean
   }
@@ -66,16 +68,16 @@ export interface CS3DAnnotation {
   }
   data: {
     handles: {
-      points: Types.Point3[]
+      points: Point3[]
       activeHandleIndex?: number
       textBox?: {
         hasMoved: boolean
-        worldPosition: Types.Point3
+        worldPosition: Point3
         worldBoundingBox: {
-          topLeft: Types.Point3
-          topRight: Types.Point3
-          bottomLeft: Types.Point3
-          bottomRight: Types.Point3
+          topLeft: Point3
+          topRight: Point3
+          bottomLeft: Point3
+          bottomRight: Point3
         }
       }
     }

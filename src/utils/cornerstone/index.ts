@@ -1,5 +1,6 @@
 /**
  * Cornerstone3D Module Exports
+ * All cornerstone imports are lazy internally to avoid WebGL crashes
  */
 
 export {
@@ -8,13 +9,9 @@ export {
   destroyRenderingEngine,
   createToolGroup,
   setActiveTool,
-  Enums,
-  volumeLoader,
-  imageLoader,
-  metaData
+  isCornerstoneReady,
+  getCornerstoneError
 } from './init'
-
-export type { Types } from './init'
 
 export {
   createStackViewport,

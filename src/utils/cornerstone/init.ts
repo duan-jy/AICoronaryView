@@ -3,105 +3,117 @@
  * 初始化 Cornerstone3D 核心库、工具库和 DICOM 图像加载器
  */
 
-import {
-  init as csInit,
-  RenderingEngine,
-  Enums,
-  volumeLoader,
-  imageLoader,
-  metaData,
-  type Types
-} from '@cornerstonejs/core'
-import * as cornerstoneTools from '@cornerstonejs/tools'
-import {
-  cornerstoneDICOMImageLoader,
-  init as dicomImageLoaderInit
-} from '@cornerstonejs/dicom-image-loader'
-import dicomParser from 'dicom-parser'
+let isInitialized = false
+let initError: string | null = null
 
-const { ToolGroupManager, Enums: ToolEnums } = cornerstoneTools
-
-// Rendering engine singleton
-let renderingEngine: RenderingEngine | null = null
+// Rendering engine singleton (typed as any to avoid import issues when WebGL unavailable)
+let renderingEngine: any = null
 const RENDERING_ENGINE_ID = 'coronaryRenderingEngine'
+
+/**
+ * Check if WebGL is available
+ */
+function hasWebGL(): boolean {
+  try {
+    const canvas = document.createElement('canvas')
+    return !!(
+      canvas.getContext('webgl2') || canvas.getContext('webgl')
+    )
+  } catch {
+    return false
+  }
+}
 
 /**
  * Initialize Cornerstone3D and related libraries
  */
-export async function initCornerstone(): Promise<void> {
-  // Initialize cornerstone core
-  await csInit()
+export async function initCornerstone(): Promise<boolean> {
+  if (isInitialized) return true
 
-  // Initialize DICOM image loader
-  dicomImageLoaderInit({
-    maxWebWorkers: navigator.hardwareConcurrency || 4,
-    startWebWorkersOnDemand: true,
-    taskConfiguration: {
-      decodeTask: {
-        initializeCodecsOnStartup: true,
-        strict: false
-      }
-    }
-  })
-
-  // Configure cornerstone DICOM image loader
-  cornerstoneDICOMImageLoader.external.cornerstone = {
-    imageLoader,
-    metaData
+  if (!hasWebGL()) {
+    initError = 'WebGL not available'
+    console.warn('[Cornerstone3D] WebGL not available - running in demo mode')
+    return false
   }
-  cornerstoneDICOMImageLoader.external.dicomParser = dicomParser
 
-  // Initialize cornerstone tools
-  cornerstoneTools.init()
+  try {
+    const csCore = await import('@cornerstonejs/core')
+    const csTools = await import('@cornerstonejs/tools')
 
-  // Register tools
-  registerTools()
+    // Initialize cornerstone core
+    await csCore.init()
 
-  console.log('[Cornerstone3D] Initialization complete')
+    // Try to initialize DICOM image loader
+    try {
+      const csDicom = await import('@cornerstonejs/dicom-image-loader')
+      csDicom.init({
+        maxWebWorkers: navigator.hardwareConcurrency || 4,
+        startWebWorkersOnDemand: true,
+        taskConfiguration: {
+          decodeTask: {
+            initializeCodecsOnStartup: true,
+            strict: false
+          }
+        }
+      })
+    } catch (e) {
+      console.warn('[Cornerstone3D] DICOM image loader init failed:', e)
+    }
+
+    // Initialize cornerstone tools
+    csTools.init()
+
+    // Register tools
+    registerTools(csTools)
+
+    isInitialized = true
+    console.log('[Cornerstone3D] Initialization complete')
+    return true
+  } catch (error: any) {
+    initError = error?.message || 'Unknown error'
+    console.warn('[Cornerstone3D] Init failed:', initError)
+    return false
+  }
 }
 
 /**
  * Register all required cornerstone tools
  */
-function registerTools(): void {
-  const {
-    PanTool,
-    ZoomTool,
-    WindowLevelTool,
-    StackScrollTool,
-    LengthTool,
-    AngleTool,
-    RectangleROITool,
-    EllipticalROITool,
-    ArrowAnnotateTool,
-    ProbeTool,
-    MagnifyTool,
-    CrosshairsTool,
-    SegmentationDisplayTool
-  } = cornerstoneTools
+function registerTools(csTools: any): void {
+  const tools = [
+    'PanTool', 'ZoomTool', 'WindowLevelTool', 'StackScrollTool',
+    'LengthTool', 'AngleTool', 'RectangleROITool', 'EllipticalROITool',
+    'ArrowAnnotateTool', 'ProbeTool', 'MagnifyTool',
+    'CrosshairsTool', 'SegmentationDisplayTool'
+  ]
 
-  // Add tools to cornerstone
-  cornerstoneTools.addTool(PanTool)
-  cornerstoneTools.addTool(ZoomTool)
-  cornerstoneTools.addTool(WindowLevelTool)
-  cornerstoneTools.addTool(StackScrollTool)
-  cornerstoneTools.addTool(LengthTool)
-  cornerstoneTools.addTool(AngleTool)
-  cornerstoneTools.addTool(RectangleROITool)
-  cornerstoneTools.addTool(EllipticalROITool)
-  cornerstoneTools.addTool(ArrowAnnotateTool)
-  cornerstoneTools.addTool(ProbeTool)
-  cornerstoneTools.addTool(MagnifyTool)
-  cornerstoneTools.addTool(CrosshairsTool)
-  cornerstoneTools.addTool(SegmentationDisplayTool)
+  tools.forEach(toolName => {
+    try {
+      if (csTools[toolName]) {
+        csTools.addTool(csTools[toolName])
+      }
+    } catch (e) {
+      console.warn(`[Cornerstone3D] Failed to register ${toolName}:`, e)
+    }
+  })
 }
 
 /**
  * Get or create the rendering engine singleton
  */
-export function getRenderingEngine(): RenderingEngine {
+export async function getRenderingEngine(): Promise<any> {
+  if (!isInitialized) {
+    const ok = await initCornerstone()
+    if (!ok) return null
+  }
+
   if (!renderingEngine) {
-    renderingEngine = new RenderingEngine(RENDERING_ENGINE_ID)
+    try {
+      const { RenderingEngine } = await import('@cornerstonejs/core')
+      renderingEngine = new RenderingEngine(RENDERING_ENGINE_ID)
+    } catch {
+      return null
+    }
   }
   return renderingEngine
 }
@@ -117,82 +129,86 @@ export function destroyRenderingEngine(): void {
 }
 
 /**
+ * Check if cornerstone is available
+ */
+export function isCornerstoneReady(): boolean {
+  return isInitialized
+}
+
+export function getCornerstoneError(): string | null {
+  return initError
+}
+
+/**
  * Create a tool group for viewports
  */
-export function createToolGroup(
+export async function createToolGroup(
   toolGroupId: string,
   viewportIds: string[]
-): cornerstoneTools.Types.IToolGroup | undefined {
-  // Remove existing tool group if present
-  const existingGroup = ToolGroupManager.getToolGroup(toolGroupId)
-  if (existingGroup) {
-    ToolGroupManager.destroyToolGroup(toolGroupId)
+): Promise<any> {
+  if (!isInitialized) return null
+
+  try {
+    const csTools = await import('@cornerstonejs/tools')
+    const { ToolGroupManager, Enums: ToolEnums } = csTools
+
+    const existingGroup = ToolGroupManager.getToolGroup(toolGroupId)
+    if (existingGroup) {
+      ToolGroupManager.destroyToolGroup(toolGroupId)
+    }
+
+    const toolGroup = ToolGroupManager.createToolGroup(toolGroupId)
+    if (!toolGroup) return null
+
+    // Add tools
+    const toolNames = [
+      'PanTool', 'ZoomTool', 'WindowLevelTool', 'StackScrollTool',
+      'LengthTool', 'AngleTool', 'RectangleROITool', 'EllipticalROITool',
+      'ArrowAnnotateTool', 'ProbeTool', 'MagnifyTool'
+    ]
+    toolNames.forEach(name => {
+      if (csTools[name]) {
+        try { toolGroup.addTool(csTools[name].toolName) } catch {}
+      }
+    })
+
+    // Set default bindings
+    try {
+      toolGroup.setToolActive(csTools.WindowLevelTool.toolName, {
+        bindings: [{ mouseButton: ToolEnums.MouseBindings.Primary }]
+      })
+      toolGroup.setToolActive(csTools.PanTool.toolName, {
+        bindings: [{ mouseButton: ToolEnums.MouseBindings.Auxiliary }]
+      })
+      toolGroup.setToolActive(csTools.ZoomTool.toolName, {
+        bindings: [{ mouseButton: ToolEnums.MouseBindings.Secondary }]
+      })
+    } catch {}
+
+    // Add viewports
+    viewportIds.forEach(id => {
+      toolGroup.addViewport(id, RENDERING_ENGINE_ID)
+    })
+
+    return toolGroup
+  } catch {
+    return null
   }
-
-  const toolGroup = ToolGroupManager.createToolGroup(toolGroupId)
-  if (!toolGroup) return undefined
-
-  // Add tools to the group
-  toolGroup.addTool(cornerstoneTools.PanTool.toolName)
-  toolGroup.addTool(cornerstoneTools.ZoomTool.toolName)
-  toolGroup.addTool(cornerstoneTools.WindowLevelTool.toolName)
-  toolGroup.addTool(cornerstoneTools.StackScrollTool.toolName)
-  toolGroup.addTool(cornerstoneTools.LengthTool.toolName)
-  toolGroup.addTool(cornerstoneTools.AngleTool.toolName)
-  toolGroup.addTool(cornerstoneTools.RectangleROITool.toolName)
-  toolGroup.addTool(cornerstoneTools.EllipticalROITool.toolName)
-  toolGroup.addTool(cornerstoneTools.ArrowAnnotateTool.toolName)
-  toolGroup.addTool(cornerstoneTools.ProbeTool.toolName)
-  toolGroup.addTool(cornerstoneTools.MagnifyTool.toolName)
-
-  // Set default tool bindings
-  toolGroup.setToolActive(cornerstoneTools.WindowLevelTool.toolName, {
-    bindings: [{ mouseButton: ToolEnums.MouseBindings.Primary }]
-  })
-  toolGroup.setToolActive(cornerstoneTools.PanTool.toolName, {
-    bindings: [{ mouseButton: ToolEnums.MouseBindings.Auxiliary }]
-  })
-  toolGroup.setToolActive(cornerstoneTools.ZoomTool.toolName, {
-    bindings: [{ mouseButton: ToolEnums.MouseBindings.Secondary }]
-  })
-  toolGroup.setToolActive(cornerstoneTools.StackScrollTool.toolName, {
-    bindings: [{ mouseButton: ToolEnums.MouseBindings.Wheel }]
-  })
-
-  // Add viewports to the tool group
-  viewportIds.forEach(id => {
-    toolGroup.addViewport(id, RENDERING_ENGINE_ID)
-  })
-
-  return toolGroup
 }
 
 /**
  * Set active tool for a tool group
  */
-export function setActiveTool(toolGroupId: string, toolName: string): void {
-  const toolGroup = ToolGroupManager.getToolGroup(toolGroupId)
-  if (!toolGroup) return
+export async function setActiveTool(toolGroupId: string, toolName: string): Promise<void> {
+  if (!isInitialized) return
 
-  // Deactivate all annotation tools first
-  const annotationTools = [
-    cornerstoneTools.LengthTool.toolName,
-    cornerstoneTools.AngleTool.toolName,
-    cornerstoneTools.RectangleROITool.toolName,
-    cornerstoneTools.EllipticalROITool.toolName,
-    cornerstoneTools.ArrowAnnotateTool.toolName,
-    cornerstoneTools.ProbeTool.toolName
-  ]
+  try {
+    const csTools = await import('@cornerstonejs/tools')
+    const toolGroup = csTools.ToolGroupManager.getToolGroup(toolGroupId)
+    if (!toolGroup) return
 
-  annotationTools.forEach(tool => {
-    toolGroup.setToolPassive(tool)
-  })
-
-  // Activate the selected tool
-  toolGroup.setToolActive(toolName, {
-    bindings: [{ mouseButton: ToolEnums.MouseBindings.Primary }]
-  })
+    toolGroup.setToolActive(toolName, {
+      bindings: [{ mouseButton: csTools.Enums.MouseBindings.Primary }]
+    })
+  } catch {}
 }
-
-export { Enums, volumeLoader, imageLoader, metaData }
-export type { Types }

@@ -5,6 +5,7 @@
 
 import { ref, onMounted, onBeforeUnmount, watch, type Ref } from 'vue'
 import {
+  isCornerstoneReady,
   createStackViewport,
   loadStackImages,
   removeViewport,
@@ -32,7 +33,7 @@ export function useViewport(
   options: UseViewportOptions
 ) {
   const { viewportId, toolGroupId, autoResize = true } = options
-  
+
   const viewerStore = useViewerStore()
   const isReady = ref(false)
   const isLoading = ref(false)
@@ -40,6 +41,7 @@ export function useViewport(
   const totalImages = ref(0)
   const windowWidth = ref(800)
   const windowCenter = ref(300)
+  const cornerstoneAvailable = ref(false)
 
   let resizeObserver: ResizeObserver | null = null
 
@@ -47,7 +49,16 @@ export function useViewport(
   async function initViewport() {
     if (!elementRef.value) return
 
-    const viewport = createStackViewport({
+    // Check if cornerstone is available (needs WebGL)
+    if (!isCornerstoneReady()) {
+      console.warn('[useViewport] Cornerstone not ready - viewport will be placeholder only')
+      isReady.value = true
+      return
+    }
+
+    cornerstoneAvailable.value = true
+
+    const viewport = await createStackViewport({
       viewportId,
       element: elementRef.value,
       background: [0, 0, 0]
@@ -56,13 +67,11 @@ export function useViewport(
     if (viewport) {
       isReady.value = true
 
-      // Create tool group if specified
       if (toolGroupId) {
-        createToolGroup(toolGroupId, [viewportId])
+        await createToolGroup(toolGroupId, [viewportId])
       }
 
-      // Setup resize observer
-      if (autoResize) {
+      if (autoResize && elementRef.value) {
         resizeObserver = new ResizeObserver(() => {
           resizeViewport(viewportId)
         })
@@ -72,8 +81,8 @@ export function useViewport(
   }
 
   // Load images into viewport
-  async function loadImages(urls: string[], initialIndex = 0) {
-    if (!isReady.value) return
+  async function loadViewportImages(urls: string[], initialIndex = 0) {
+    if (!isReady.value || !cornerstoneAvailable.value) return
 
     isLoading.value = true
     try {
@@ -94,39 +103,18 @@ export function useViewport(
   }
 
   // Viewport actions
-  function reset() {
-    resetViewport(viewportId)
-  }
-
-  function setWindowLevel(width: number, center: number) {
+  function reset() { resetViewport(viewportId) }
+  function setWL(width: number, center: number) {
     windowWidth.value = width
     windowCenter.value = center
     setViewportWindowLevel(viewportId, width, center)
   }
-
-  function flipH() {
-    flipViewportH(viewportId)
-  }
-
-  function flipV() {
-    flipViewportV(viewportId)
-  }
-
-  function rotate(degrees: number) {
-    rotateViewport(viewportId, degrees)
-  }
-
-  function invert() {
-    invertViewport(viewportId)
-  }
-
-  function getImage(): string | null {
-    return getViewportImage(viewportId)
-  }
-
-  function resize() {
-    resizeViewport(viewportId)
-  }
+  function flipH() { flipViewportH(viewportId) }
+  function flipV() { flipViewportV(viewportId) }
+  function rotate(degrees: number) { rotateViewport(viewportId, degrees) }
+  function invert() { invertViewport(viewportId) }
+  function getImage() { return getViewportImage(viewportId) }
+  function resize() { resizeViewport(viewportId) }
 
   // Cleanup
   function cleanup() {
@@ -134,7 +122,9 @@ export function useViewport(
       resizeObserver.disconnect()
       resizeObserver = null
     }
-    removeViewport(viewportId)
+    if (cornerstoneAvailable.value) {
+      removeViewport(viewportId)
+    }
     isReady.value = false
   }
 
@@ -142,7 +132,7 @@ export function useViewport(
   watch(
     () => viewerStore.windowLevel,
     (newLevel) => {
-      if (isReady.value) {
+      if (isReady.value && cornerstoneAvailable.value) {
         setViewportWindowLevel(viewportId, newLevel.width, newLevel.center)
         windowWidth.value = newLevel.width
         windowCenter.value = newLevel.center
@@ -150,25 +140,20 @@ export function useViewport(
     }
   )
 
-  // Lifecycle
-  onMounted(() => {
-    initViewport()
-  })
-
-  onBeforeUnmount(() => {
-    cleanup()
-  })
+  onMounted(() => { initViewport() })
+  onBeforeUnmount(() => { cleanup() })
 
   return {
     isReady,
     isLoading,
+    cornerstoneAvailable,
     currentImageIndex,
     totalImages,
     windowWidth,
     windowCenter,
-    loadImages,
+    loadImages: loadViewportImages,
     reset,
-    setWindowLevel,
+    setWindowLevel: setWL,
     flipH,
     flipV,
     rotate,

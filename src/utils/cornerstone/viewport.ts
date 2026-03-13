@@ -1,20 +1,15 @@
 /**
  * Cornerstone3D Viewport Utilities
- * 视口创建和管理工具
+ * 视口创建和管理工具 - All imports are lazy to avoid WebGL crashes
  */
 
-import {
-  RenderingEngine,
-  Enums,
-  type Types
-} from '@cornerstonejs/core'
-import { getRenderingEngine } from './init'
+import { getRenderingEngine, isCornerstoneReady } from './init'
 
 export interface ViewportOptions {
   viewportId: string
   element: HTMLDivElement
   type?: 'stack' | 'volume'
-  background?: Types.RGB
+  background?: [number, number, number]
 }
 
 export interface StackViewportConfig {
@@ -26,205 +21,151 @@ export interface StackViewportConfig {
 /**
  * Create a stack viewport
  */
-export function createStackViewport(
-  options: ViewportOptions
-): Types.IStackViewport | null {
-  const { viewportId, element, background = [0, 0, 0] } = options
-  const renderingEngine = getRenderingEngine()
+export async function createStackViewport(options: ViewportOptions): Promise<any> {
+  if (!isCornerstoneReady()) return null
+  try {
+    const { Enums } = await import('@cornerstonejs/core')
+    const { viewportId, element, background = [0, 0, 0] } = options
+    const renderingEngine = await getRenderingEngine()
+    if (!renderingEngine) return null
 
-  // Check if viewport already exists
-  const existingViewport = renderingEngine.getViewport(viewportId)
-  if (existingViewport) {
-    return existingViewport as Types.IStackViewport
-  }
+    const existingViewport = renderingEngine.getViewport(viewportId)
+    if (existingViewport) return existingViewport
 
-  // Enable the element for cornerstone
-  const viewportInput: Types.PublicViewportInput = {
-    viewportId,
-    type: Enums.ViewportType.STACK,
-    element,
-    defaultOptions: {
-      background
-    }
-  }
+    renderingEngine.enableElement({
+      viewportId,
+      type: Enums.ViewportType.STACK,
+      element,
+      defaultOptions: { background }
+    })
 
-  renderingEngine.enableElement(viewportInput)
-  
-  return renderingEngine.getViewport(viewportId) as Types.IStackViewport
+    return renderingEngine.getViewport(viewportId)
+  } catch { return null }
 }
 
 /**
  * Create a volume viewport
  */
-export function createVolumeViewport(
-  options: ViewportOptions
-): Types.IVolumeViewport | null {
-  const { viewportId, element, background = [0, 0, 0] } = options
-  const renderingEngine = getRenderingEngine()
+export async function createVolumeViewport(options: ViewportOptions): Promise<any> {
+  if (!isCornerstoneReady()) return null
+  try {
+    const { Enums } = await import('@cornerstonejs/core')
+    const { viewportId, element, background = [0, 0, 0] } = options
+    const renderingEngine = await getRenderingEngine()
+    if (!renderingEngine) return null
 
-  const viewportInput: Types.PublicViewportInput = {
-    viewportId,
-    type: Enums.ViewportType.ORTHOGRAPHIC,
-    element,
-    defaultOptions: {
-      background
-    }
-  }
+    renderingEngine.enableElement({
+      viewportId,
+      type: Enums.ViewportType.ORTHOGRAPHIC,
+      element,
+      defaultOptions: { background }
+    })
 
-  renderingEngine.enableElement(viewportInput)
-  
-  return renderingEngine.getViewport(viewportId) as Types.IVolumeViewport
+    return renderingEngine.getViewport(viewportId)
+  } catch { return null }
 }
 
 /**
  * Load images into a stack viewport
  */
-export async function loadStackImages(
-  config: StackViewportConfig
-): Promise<void> {
-  const { viewportId, imageIds, initialImageIndex = 0 } = config
-  const renderingEngine = getRenderingEngine()
-  const viewport = renderingEngine.getViewport(viewportId) as Types.IStackViewport
+export async function loadStackImages(config: StackViewportConfig): Promise<void> {
+  if (!isCornerstoneReady()) return
+  try {
+    const { viewportId, imageIds, initialImageIndex = 0 } = config
+    const renderingEngine = await getRenderingEngine()
+    if (!renderingEngine) return
 
-  if (!viewport) {
-    console.error(`[Viewport] Viewport ${viewportId} not found`)
-    return
-  }
+    const viewport = renderingEngine.getViewport(viewportId)
+    if (!viewport) return
 
-  await viewport.setStack(imageIds, initialImageIndex)
-  viewport.render()
+    await viewport.setStack(imageIds, initialImageIndex)
+    viewport.render()
+  } catch {}
 }
 
 /**
  * Get viewport by ID
  */
-export function getViewport(viewportId: string): Types.IViewport | undefined {
-  const renderingEngine = getRenderingEngine()
-  return renderingEngine.getViewport(viewportId)
+export async function getViewport(viewportId: string): Promise<any> {
+  const renderingEngine = await getRenderingEngine()
+  return renderingEngine?.getViewport(viewportId) ?? null
 }
 
-/**
- * Remove a viewport
- */
-export function removeViewport(viewportId: string): void {
-  const renderingEngine = getRenderingEngine()
-  renderingEngine.disableElement(viewportId)
+export async function removeViewport(viewportId: string): Promise<void> {
+  const renderingEngine = await getRenderingEngine()
+  renderingEngine?.disableElement(viewportId)
 }
 
-/**
- * Render a viewport
- */
-export function renderViewport(viewportId: string): void {
-  const renderingEngine = getRenderingEngine()
-  const viewport = renderingEngine.getViewport(viewportId)
-  if (viewport) {
-    viewport.render()
-  }
+export async function renderViewport(viewportId: string): Promise<void> {
+  const vp = await getViewport(viewportId)
+  vp?.render()
 }
 
-/**
- * Render all viewports
- */
-export function renderAllViewports(): void {
-  const renderingEngine = getRenderingEngine()
-  renderingEngine.render()
+export async function renderAllViewports(): Promise<void> {
+  const renderingEngine = await getRenderingEngine()
+  renderingEngine?.render()
 }
 
-/**
- * Reset viewport camera
- */
-export function resetViewport(viewportId: string): void {
-  const viewport = getViewport(viewportId)
-  if (viewport) {
-    viewport.resetCamera()
-    viewport.render()
-  }
+export async function resetViewport(viewportId: string): Promise<void> {
+  const vp = await getViewport(viewportId)
+  if (vp) { vp.resetCamera(); vp.render() }
 }
 
-/**
- * Set viewport window level
- */
-export function setViewportWindowLevel(
-  viewportId: string,
-  windowWidth: number,
-  windowCenter: number
-): void {
-  const viewport = getViewport(viewportId) as Types.IStackViewport
-  if (viewport && viewport.setProperties) {
-    viewport.setProperties({
-      voiRange: {
-        lower: windowCenter - windowWidth / 2,
-        upper: windowCenter + windowWidth / 2
-      }
+export async function setViewportWindowLevel(
+  viewportId: string, windowWidth: number, windowCenter: number
+): Promise<void> {
+  const vp = await getViewport(viewportId)
+  if (vp?.setProperties) {
+    vp.setProperties({
+      voiRange: { lower: windowCenter - windowWidth / 2, upper: windowCenter + windowWidth / 2 }
     })
-    viewport.render()
+    vp.render()
   }
 }
 
-/**
- * Flip viewport horizontally
- */
-export function flipViewportH(viewportId: string): void {
-  const viewport = getViewport(viewportId) as Types.IStackViewport
-  if (viewport) {
-    const { flipHorizontal } = viewport.getCamera()
-    viewport.setCamera({ flipHorizontal: !flipHorizontal })
-    viewport.render()
+export async function flipViewportH(viewportId: string): Promise<void> {
+  const vp = await getViewport(viewportId)
+  if (vp) {
+    const { flipHorizontal } = vp.getCamera()
+    vp.setCamera({ flipHorizontal: !flipHorizontal })
+    vp.render()
   }
 }
 
-/**
- * Flip viewport vertically
- */
-export function flipViewportV(viewportId: string): void {
-  const viewport = getViewport(viewportId) as Types.IStackViewport
-  if (viewport) {
-    const { flipVertical } = viewport.getCamera()
-    viewport.setCamera({ flipVertical: !flipVertical })
-    viewport.render()
+export async function flipViewportV(viewportId: string): Promise<void> {
+  const vp = await getViewport(viewportId)
+  if (vp) {
+    const { flipVertical } = vp.getCamera()
+    vp.setCamera({ flipVertical: !flipVertical })
+    vp.render()
   }
 }
 
-/**
- * Rotate viewport
- */
-export function rotateViewport(viewportId: string, degrees: number): void {
-  const viewport = getViewport(viewportId) as Types.IStackViewport
-  if (viewport && viewport.getProperties) {
-    const properties = viewport.getProperties()
-    const currentRotation = properties.rotation || 0
-    viewport.setProperties({ rotation: currentRotation + degrees })
-    viewport.render()
+export async function rotateViewport(viewportId: string, degrees: number): Promise<void> {
+  const vp = await getViewport(viewportId)
+  if (vp?.getProperties) {
+    const props = vp.getProperties()
+    vp.setProperties({ rotation: (props.rotation || 0) + degrees })
+    vp.render()
   }
 }
 
-/**
- * Invert viewport colors
- */
-export function invertViewport(viewportId: string): void {
-  const viewport = getViewport(viewportId) as Types.IStackViewport
-  if (viewport && viewport.getProperties) {
-    const properties = viewport.getProperties()
-    viewport.setProperties({ invert: !properties.invert })
-    viewport.render()
+export async function invertViewport(viewportId: string): Promise<void> {
+  const vp = await getViewport(viewportId)
+  if (vp?.getProperties) {
+    const props = vp.getProperties()
+    vp.setProperties({ invert: !props.invert })
+    vp.render()
   }
 }
 
-/**
- * Get viewport canvas as data URL
- */
-export function getViewportImage(viewportId: string): string | null {
-  const viewport = getViewport(viewportId)
-  if (!viewport) return null
-
-  const canvas = viewport.getCanvas()
-  return canvas.toDataURL('image/png')
+export async function getViewportImage(viewportId: string): Promise<string | null> {
+  const vp = await getViewport(viewportId)
+  if (!vp) return null
+  return vp.getCanvas().toDataURL('image/png')
 }
 
-/**
- * Resize viewport
- */
-export function resizeViewport(viewportId: string): void {
-  const renderingEngine = getRenderingEngine()
-  renderingEngine.resize(true, true)
+export async function resizeViewport(_viewportId: string): Promise<void> {
+  const renderingEngine = await getRenderingEngine()
+  renderingEngine?.resize(true, true)
 }

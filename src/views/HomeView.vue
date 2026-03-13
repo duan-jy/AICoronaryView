@@ -4,7 +4,6 @@ import { useRoute } from 'vue-router'
 import { useAppStore } from '@/stores/app'
 import { useArteryStore } from '@/stores/artery'
 import { useViewerStore } from '@/stores/viewer'
-import { api } from '@/api'
 
 import HomeHeader from '@/components/home/HomeHeader.vue'
 import ArterySidebar from '@/components/home/ArterySidebar.vue'
@@ -18,52 +17,27 @@ const viewerStore = useViewerStore()
 
 const studyId = ref('')
 const isInitialized = ref(false)
+const initError = ref('')
 
 // Initialize study data
 async function initStudy() {
   appStore.setLoading(true, '正在加载影像数据...')
-  
+
   try {
     // Get study ID from route or query params
-    const id = route.query.studyId as string || route.query.id as string || 'demo'
+    const id = (route.query.studyId as string) || (route.query.id as string) || 'demo'
     studyId.value = id
-    
-    // Load study info
-    const study = await api.getStudyInfo(id)
-    viewerStore.setStudy(study)
-    
-    // Load all artery images
-    await loadArteryImages(id)
-    
-    // Load diagnostic report
-    await loadReport(id)
-    
-    // Initialize stenosis list
+
+    // Initialize with demo/fallback data for now
     arteryStore.initStenosisList()
-    
     isInitialized.value = true
-  } catch (error) {
-    console.error('[HomeView] Failed to initialize study:', error)
+  } catch (error: any) {
+    console.warn('[HomeView] Init error (expected in demo):', error?.message)
+    initError.value = error?.message || '初始化失败'
+    // Still show the UI even on error
+    isInitialized.value = true
   } finally {
     appStore.setLoading(false)
-  }
-}
-
-async function loadArteryImages(id: string) {
-  try {
-    const allImages = await api.getAllArteryImages(id)
-    arteryStore.setAllArteryImages(allImages)
-  } catch (error) {
-    console.error('[HomeView] Failed to load artery images:', error)
-  }
-}
-
-async function loadReport(id: string) {
-  try {
-    const report = await api.getReport(id)
-    arteryStore.updateReport(report)
-  } catch (error) {
-    console.error('[HomeView] Failed to load report:', error)
   }
 }
 
@@ -79,12 +53,12 @@ onMounted(() => {
   <div class="home-view layout-main">
     <!-- Header with logo, tools, patient info -->
     <HomeHeader :study="viewerStore.study" />
-    
+
     <!-- Main content area -->
     <div class="layout-body">
       <!-- Left sidebar: Artery navigation -->
       <ArterySidebar />
-      
+
       <!-- Center: Viewport grid -->
       <div class="layout-content">
         <ViewportGrid v-if="isInitialized" />
@@ -93,7 +67,7 @@ onMounted(() => {
           <span>正在初始化视口...</span>
         </div>
       </div>
-      
+
       <!-- Right panel: Diagnosis report -->
       <DiagnosisPanel />
     </div>

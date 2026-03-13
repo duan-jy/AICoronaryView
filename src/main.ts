@@ -2,20 +2,19 @@ import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import App from './App.vue'
 import router from './router'
-import { initCornerstone } from './utils/cornerstone'
 
 import './styles/main.less'
 
-async function bootstrap() {
-  // Initialize Cornerstone3D before mounting the app
-  await initCornerstone()
+const app = createApp(App)
 
-  const app = createApp(App)
+app.use(createPinia())
+app.use(router)
 
-  app.use(createPinia())
-  app.use(router)
+app.mount('#app')
 
-  app.mount('#app')
-}
-
-bootstrap().catch(console.error)
+// Initialize Cornerstone3D lazily after app mount (non-blocking)
+// This prevents WebGL errors from crashing the entire app
+import('./utils/cornerstone/init')
+  .then(({ initCornerstone }) => initCornerstone())
+  .then(() => console.log('[v0] Cornerstone3D initialized'))
+  .catch((err) => console.warn('[v0] Cornerstone3D init skipped (no WebGL?):', err))

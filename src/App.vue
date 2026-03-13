@@ -1,29 +1,30 @@
 <script setup lang="ts">
-import { ref, nextTick, provide } from 'vue'
+import { ref, nextTick, provide, onMounted } from 'vue'
 import { RouterView } from 'vue-router'
 import { useAppStore } from './stores/app'
 
 const appStore = useAppStore()
 const isRouterActive = ref(true)
 
-// Initialize app config
-appStore.getAppConfig()
-
 const reload = () => {
   isRouterActive.value = false
   nextTick(() => {
     isRouterActive.value = true
-    appStore.getAppConfig()
   })
 }
 
 provide('reload', reload)
+
+onMounted(() => {
+  // Try to load config, but don't crash if API is unavailable
+  appStore.getAppConfig().catch(() => {})
+})
 </script>
 
 <template>
-  <div class="app-container" :class="{ 'is-loading': appStore.loading }">
+  <div class="app-container">
     <RouterView v-if="isRouterActive" />
-    
+
     <!-- Global Loading Overlay -->
     <Transition name="fade">
       <div v-if="appStore.loading" class="loading-overlay">

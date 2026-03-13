@@ -16,9 +16,6 @@ export default defineConfig({
       }
     }
   },
-  optimizeDeps: {
-    include: ['dicom-parser']
-  },
   server: {
     port: 3000,
     proxy: {
@@ -26,16 +23,6 @@ export default defineConfig({
         target: 'http://localhost:8080',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, '')
-      }
-    }
-  },
-  build: {
-    rollupOptions: {
-      output: {
-        manualChunks: {
-          cornerstone: ['@cornerstonejs/core', '@cornerstonejs/tools'],
-          vendor: ['vue', 'vue-router', 'pinia']
-        }
       }
     }
   }
