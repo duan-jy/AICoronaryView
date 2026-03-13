@@ -1,0 +1,296 @@
+{
+  "id": "2942244",
+  "name": "artery",
+  "font_family": "artery-icon",
+  "css_prefix_text": "icon-",
+  "description": "",
+  "glyphs": [
+    {
+      "icon_id": "15644307",
+      "name": "标记",
+      "font_class": "biaoji",
+      "unicode": "e6ba",
+      "unicode_decimal": 59066
+    },
+    {
+      "icon_id": "19713558",
+      "name": "组合",
+      "font_class": "combine",
+      "unicode": "ebe9",
+      "unicode_decimal": 60393
+    },
+    {
+      "icon_id": "630128",
+      "name": "照相机",
+      "font_class": "zhaoxiangji",
+      "unicode": "e663",
+      "unicode_decimal": 58979
+    },
+    {
+      "icon_id": "33816340",
+      "name": "速度-线",
+      "font_class": "sudu-xian",
+      "unicode": "e623",
+      "unicode_decimal": 58915
+    },
+    {
+      "icon_id": "15617575",
+      "name": "mask",
+      "font_class": "mask",
+      "unicode": "e8f0",
+      "unicode_decimal": 59632
+    },
+    {
+      "icon_id": "18610415",
+      "name": "左右翻转",
+      "font_class": "zuoyoufanzhuan",
+      "unicode": "e604",
+      "unicode_decimal": 58884
+    },
+    {
+      "icon_id": "6265059",
+      "name": "保存-实色",
+      "font_class": "save-s",
+      "unicode": "e646",
+      "unicode_decimal": 58950
+    },
+    {
+      "icon_id": "3920049",
+      "name": "血液",
+      "font_class": "blood",
+      "unicode": "e60e",
+      "unicode_decimal": 58894
+    },
+    {
+      "icon_id": "6421695",
+      "name": "闪光灯-暗",
+      "font_class": "shanguangdeng-an",
+      "unicode": "e6aa",
+      "unicode_decimal": 59050
+    },
+    {
+      "icon_id": "6421696",
+      "name": "闪光灯-亮",
+      "font_class": "shanguangdeng-liang",
+      "unicode": "e6ab",
+      "unicode_decimal": 59051
+    },
+    {
+      "icon_id": "954966",
+      "name": "打印",
+      "font_class": "dayin",
+      "unicode": "e633",
+      "unicode_decimal": 58931
+    },
+    {
+      "icon_id": "17826315",
+      "name": "删除图像 2",
+      "font_class": "shanchutuxiang2",
+      "unicode": "e61d",
+      "unicode_decimal": 58909
+    },
+    {
+      "icon_id": "17826347",
+      "name": "拖动图像 2",
+      "font_class": "tuodongtuxiang2",
+      "unicode": "e620",
+      "unicode_decimal": 58912
+    },
+    {
+      "icon_id": "18241147",
+      "name": "复制图像",
+      "font_class": "fuzhituxiang",
+      "unicode": "e69c",
+      "unicode_decimal": 59036
+    },
+    {
+      "icon_id": "20907745",
+      "name": "添加图像",
+      "font_class": "tianjiatuxiang",
+      "unicode": "e777",
+      "unicode_decimal": 59255
+    },
+    {
+      "icon_id": "17826321",
+      "name": "新增胶片 2",
+      "font_class": "xinzengjiaopian2",
+      "unicode": "e61e",
+      "unicode_decimal": 58910
+    },
+    {
+      "icon_id": "18218557",
+      "name": "删除胶片",
+      "font_class": "shanchujiaopian",
+      "unicode": "e68c",
+      "unicode_decimal": 59020
+    },
+    {
+      "icon_id": "19835252",
+      "name": "十字@1x",
+      "font_class": "shizix-copy",
+      "unicode": "e601",
+      "unicode_decimal": 58881
+    },
+    {
+      "icon_id": "19453880",
+      "name": "清除标注",
+      "font_class": "qingchubiaozhu",
+      "unicode": "e652",
+      "unicode_decimal": 58962
+    },
+    {
+      "icon_id": "807276",
+      "name": "缩小",
+      "font_class": "suoxiao",
+      "unicode": "e661",
+      "unicode_decimal": 58977
+    },
+    {
+      "icon_id": "10805801",
+      "name": "心脏",
+      "font_class": "xinzang",
+      "unicode": "e610",
+      "unicode_decimal": 58896
+    },
+    {
+      "icon_id": "12097431",
+      "name": "放大",
+      "font_class": "fangda1",
+      "unicode": "e650",
+      "unicode_decimal": 58960
+    },
+    {
+      "icon_id": "12349199",
+      "name": "显示",
+      "font_class": "xianshi",
+      "unicode": "e69a",
+      "unicode_decimal": 59034
+    },
+    {
+      "icon_id": "12349201",
+      "name": "隐藏",
+      "font_class": "yincang",
+      "unicode": "e69b",
+      "unicode_decimal": 59035
+    },
+    {
+      "icon_id": "8522687",
+      "name": "横竖屏（已设置）",
+      "font_class": "hengshupingyishezhi",
+      "unicode": "e61c",
+      "unicode_decimal": 58908
+    },
+    {
+      "icon_id": "4784107",
+      "name": "设置",
+      "font_class": "shezhi",
+      "unicode": "e657",
+      "unicode_decimal": 58967
+    },
+    {
+      "icon_id": "7596117",
+      "name": "移动工具",
+      "font_class": "yidonggongju",
+      "unicode": "e625",
+      "unicode_decimal": 58917
+    },
+    {
+      "icon_id": "13074382",
+      "name": "区域测量",
+      "font_class": "quyuceliang",
+      "unicode": "e651",
+      "unicode_decimal": 58961
+    },
+    {
+      "icon_id": "18171091",
+      "name": "地图尺子,测量,测距,距离",
+      "font_class": "map-ruler",
+      "unicode": "ea07",
+      "unicode_decimal": 59911
+    },
+    {
+      "icon_id": "20266185",
+      "name": "放大镜",
+      "font_class": "fangdajing",
+      "unicode": "e6d9",
+      "unicode_decimal": 59097
+    },
+    {
+      "icon_id": "22276481",
+      "name": "箭头标记",
+      "font_class": "jiantou",
+      "unicode": "e699",
+      "unicode_decimal": 59033
+    },
+    {
+      "icon_id": "466354",
+      "name": "推送",
+      "font_class": "tuisong",
+      "unicode": "e631",
+      "unicode_decimal": 58929
+    },
+    {
+      "icon_id": "722470",
+      "name": "眼睛",
+      "font_class": "yanjing",
+      "unicode": "e61a",
+      "unicode_decimal": 58906
+    },
+    {
+      "icon_id": "3496278",
+      "name": "清空",
+      "font_class": "qingkong",
+      "unicode": "e60d",
+      "unicode_decimal": 58893
+    },
+    {
+      "icon_id": "3683442",
+      "name": "查看",
+      "font_class": "chakan",
+      "unicode": "e6bf",
+      "unicode_decimal": 59071
+    },
+    {
+      "icon_id": "5114095",
+      "name": "消息推送",
+      "font_class": "huaban",
+      "unicode": "e61b",
+      "unicode_decimal": 58907
+    },
+    {
+      "icon_id": "5387615",
+      "name": "选择器展开",
+      "font_class": "xuanzeqizhankai",
+      "unicode": "eb15",
+      "unicode_decimal": 60181
+    },
+    {
+      "icon_id": "9348431",
+      "name": "检查号",
+      "font_class": "jianchahao",
+      "unicode": "e7af",
+      "unicode_decimal": 59311
+    },
+    {
+      "icon_id": "11234707",
+      "name": "角度",
+      "font_class": "jiaodu",
+      "unicode": "e67e",
+      "unicode_decimal": 59006
+    },
+    {
+      "icon_id": "15391367",
+      "name": "报告",
+      "font_class": "baogao",
+      "unicode": "e61f",
+      "unicode_decimal": 58911
+    },
+    {
+      "icon_id": "18099796",
+      "name": "任意直线-01",
+      "font_class": "renyizhixian-01",
+      "unicode": "e600",
+      "unicode_decimal": 58880
+    }
+  ]
+}

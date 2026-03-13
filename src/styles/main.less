@@ -1,0 +1,206 @@
+* {
+  box-sizing: border-box;
+  -ms-overflow-style: none;
+  overflow: -moz-scrollbars-none;
+  margin: 0;
+  padding: 0;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+ul,
+li,
+ol {
+  list-style: none;
+}
+
+html,
+body,
+#app {
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 100%;
+  overflow: hidden;
+}
+
+input {
+  outline: none;
+  border: none;
+}
+
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  margin: 0;
+  -webkit-appearance: none !important;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+.overlay {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  pointer-events: none;
+}
+
+.no-scrollbar {
+  scrollbar-width: none;
+  /* firefox */
+  -ms-overflow-style: none;
+
+  /* IE 10+ */
+  &::-webkit-scrollbar {
+    display: none;
+    /* Chrome Safari */
+  }
+}
+
+.msg-operate {
+  height: 30px;
+  overflow: hidden;
+  text-align: right;
+  line-height: 30px;
+
+  .operate-item {
+    display: inline-block;
+    width: 30px;
+    height: 30px;
+    border-radius: 3px;
+    text-align: center;
+    line-height: 30px;
+    font-size: 16px;
+    color: #fff;
+    background-color: #073c6b;
+    margin-left: 5px;
+    overflow: hidden;
+    cursor: pointer;
+
+    .el-icon {
+      width: 100%;
+      height: 100%;
+      text-align: center;
+      line-height: 30px;
+      font-size: 16px;
+      color: #fff;
+    }
+
+    &.icon-huaban {
+      background-color: #e9370e;
+
+      &.hasPush {
+        background-color: #3b7cff;
+      }
+    }
+
+    &.scale-icon {
+      font-size: 20px;
+    }
+
+    &.icon-suoxiao,
+    &.icon-fangda1 {
+      background-color: #056cc6;
+    }
+
+    .icon-mask {
+      width: 20px;
+      height: 20px;
+      margin-top: 5px;
+    }
+
+    img {
+      width: 16px;
+      height: 16px;
+      display: inline-block;
+      overflow: hidden;
+    }
+  }
+}
+
+.msg-corner {
+  .msg-item {
+    width: 100%;
+    line-height: 16px;
+    font-size: 12px;
+    color: #fff;
+    user-select: none;
+  }
+}
+
+.el-image-viewer-msg {
+  width: 200px;
+  height: 20px;
+  color: #fff;
+  text-align: center;
+  line-height: 20px;
+  font-size: 18px;
+  position: absolute;
+  left: 50%;
+  bottom: 84px;
+  z-index: 1;
+  transform: translateX(-50%);
+  overflow: hidden;
+}
+
+.pretty-bar {
+
+  // 滚动条整体
+  &::-webkit-scrollbar {
+    z-index: 50;
+    width: 10px;
+    height: 3px;
+    background: #1c2541;
+  }
+
+  // 滚动条滑道
+  &::-webkit-scrollbar-track {
+    background-color: #1c2541;
+  }
+
+  // 滚动滑块样式
+  &::-webkit-scrollbar-thumb {
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    border-radius: 5px;
+    background-color: #315397;
+    transition: all 0.2s;
+    height: 10px;
+    border: 1px solid #315397;
+  }
+
+  // 滚动条的样式，是可以跟 :hover 伪类叠加使用的
+  // 滚动条鼠标悬浮时的样式
+  &:hover::-webkit-scrollbar-thumb {
+    transition: all 0.2s;
+  }
+
+  // 滚动条上下的箭头按钮
+  &::-webkit-scrollbar-button {
+    display: none;
+  }
+
+  &::-webkit-scrollbar-corner {
+    display: none;
+  }
+}
+
+.dcm-content-mask {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  background: none;
+  pointer-events: none;
+  z-index: 10;
+
+  canvas {
+    background-color: rgba(255, 255, 255, 0);
+  }
+}
